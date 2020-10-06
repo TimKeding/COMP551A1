@@ -20,14 +20,13 @@ def keep_15_symptoms(df: pd.DataFrame):
         s = s.drop(s.idxmax(), axis=0)
 
     # keep only 15 symptoms with highest popularity and convert to csv
-    merged_file2 = df.drop(
+    return df.drop(
         columns=[
             col
             for col in df.loc[:, "symptom:Adrenal crisis":"symptom:Yawn"]
             if col not in arr
         ]
     )
-    merged_file2.to_csv("merge2.csv")
 
 
 def merge_regions(data: pd.DataFrame):
