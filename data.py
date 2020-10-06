@@ -3,12 +3,12 @@ import numpy as np
 
 
 def filter_out_zeros(df: pd.DataFrame):
-    return df.dropna(axis=1, how='all')
+    return df.dropna(axis=1, how="all")
 
 
 def keep_15_symptoms(df: pd.DataFrame):
     # sum all columns(symptoms)
-    cropped = df.loc[:, 'symptom:Adrenal crisis':'symptom:Yawn']
+    cropped = df.loc[:, "symptom:Adrenal crisis":"symptom:Yawn"]
     s = cropped.sum(axis=0)
 
     # get 15 symptoms with highest sum value(sum of popularity)
@@ -16,12 +16,17 @@ def keep_15_symptoms(df: pd.DataFrame):
     for j in range(15):
         # most common symptoms with sum of columns:
         # arr[j] = (s.idxmax(), ',', s.max())
-        arr[j] = (s.idxmax())
+        arr[j] = s.idxmax()
         s = s.drop(s.idxmax(), axis=0)
 
     # keep only 15 symptoms with highest popularity and convert to csv
     merged_file2 = df.drop(
-        columns=[col for col in df.loc[:, 'symptom:Adrenal crisis':'symptom:Yawn'] if col not in arr])
+        columns=[
+            col
+            for col in df.loc[:, "symptom:Adrenal crisis":"symptom:Yawn"]
+            if col not in arr
+        ]
+    )
     merged_file2.to_csv("merge2.csv")
 
 
@@ -38,7 +43,10 @@ def get_data():
     )
     hosp = (
         hosp.groupby(
-            ["open_covid_region_code", pd.Grouper(key="date", freq="W-MON", closed="left")]
+            [
+                "open_covid_region_code",
+                pd.Grouper(key="date", freq="W-MON", closed="left"),
+            ]
         )
         .sum()
         .reset_index()
