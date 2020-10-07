@@ -4,11 +4,11 @@ import pandas as pd
 
 class Data:
     def __init__(self):
-        self.d = Data.import_data()
+        self.d = None
+        self.import_data()
         self.filter_out_zeros()
 
-    @staticmethod
-    def import_data():
+    def import_data(self):
         hosp = pd.read_csv("hospitalization.csv")
         hosp = hosp[["open_covid_region_code", "date", "hospitalized_new"]]
 
@@ -29,13 +29,12 @@ class Data:
         search = pd.read_csv("2020_US_weekly_symptoms_dataset.csv")
         search["date"] = pd.to_datetime(search["date"], format="%Y-%m-%d")
 
-        results = pd.merge(
+        self.d = pd.merge(
             search, hosp, how="left", on=["open_covid_region_code", "date"]
         )
-        return results
 
     def fill_na(self, val):
-        self.d.fillna(val)
+        self.d = self.d.fillna(val)
 
     def filter_low_data_regions(self, threshold=0.1):
         """
@@ -56,12 +55,12 @@ class Data:
         good_regions = list(
             data_per_region[data_per_region > threshold * size_per_region].index
         )
-        return self.d[self.d["open_covid_region_code"].isin(good_regions)].reset_index(
-            drop=True
-        )
+        self.d = self.d[
+            self.d["open_covid_region_code"].isin(good_regions)
+        ].reset_index(drop=True)
 
     def filter_out_zeros(self):
-        return self.d.dropna(axis=1, how="all")
+        self.d = self.d.dropna(axis=1, how="all")
 
     def keep_15_symptoms(self):
         # sum all columns(symptoms)
@@ -73,12 +72,11 @@ class Data:
         arr = [0] * 15
         for j in range(15):
             # most common symptoms with sum of columns:
-            # arr[j] = (s.idxmax(), ',', s.max())
             arr[j] = s.idxmax()
             s = s.drop(s.idxmax(), axis=0)
 
         # keep only 15 symptoms with highest popularity and convert to csv
-        return trim_data.drop(
+        self.d = trim_data.drop(
             columns=[
                 col
                 for col in trim_data.loc[:, "symptom:Adrenal crisis":"symptom:Yawn"]
@@ -87,4 +85,4 @@ class Data:
         )
 
     def merge_regions(self):
-        return self.d.groupby(["date"]).sum().reset_index()
+        self.d = self.d.groupby(["date"]).sum().reset_index()
