@@ -14,8 +14,8 @@ class PCAPlotting:
 
     def reduce_dimensionality(self, new_dimension=2):
         self.plot_dimensions = new_dimension
-        # strip out top 15 symptoms from merged dataset
-        symptoms = self.data.columns[8:23]
+        # strip out symptoms from merged dataset
+        symptoms = self.data.columns[8:-1]
         symptom_data = self.data.loc[:, symptoms].values
         symptom_data = StandardScaler().fit_transform(symptom_data)
 
