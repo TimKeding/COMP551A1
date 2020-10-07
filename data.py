@@ -60,4 +60,3 @@ class Data:
 
     def merge_regions(self):
         return self.data.groupby(["date"]).sum().reset_index()
-
