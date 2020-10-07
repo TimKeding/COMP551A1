@@ -33,6 +33,27 @@ def merge_regions(data: pd.DataFrame):
     return data.groupby(["date"]).sum().reset_index()
 
 
+def filter_regions_count(d: pd.DataFrame, threshold=0.1):
+    """
+    Keep all open_covid_region_code regions that have > 0.1 * #_elements that are not
+    NaN values.
+    :param d: region data
+    :param threshold: cutoff point. Any region with less than 0.1 of all cells filled
+            with data are filtered out
+    """
+    data_per_region = (
+        d.groupby(["open_covid_region_code"])
+        .count()
+        .loc[:, "symptom:Adrenal crisis":"symptom:Yawn"]
+        .sum(axis=1)
+    )
+    size_per_region = d.groupby(["open_covid_region_code"]).size()[0] * d.shape[1]
+    good_regions = list(
+        data_per_region[data_per_region > threshold * size_per_region].index
+    )
+    return d[d["open_covid_region_code"].isin(good_regions)].reset_index(drop=True)
+
+
 def get_data():
     hosp = pd.read_csv("hospitalization.csv")
     hosp = hosp[["open_covid_region_code", "date", "hospitalized_new"]]
