@@ -1,10 +1,19 @@
 from data import Data
 from pca import PCAPlotting
 from kmeans import Kmeans
+import symptomsPopularity
 
 dataset = Data()
-pca_data = PCAPlotting(dataset.data)
+dataset.fill_na(0)
+dataset.filter_out_zeros()
+pca_data = PCAPlotting(dataset.d)
 pca_data.reduce_dimensionality(3)
 kmeans = Kmeans(pca_data.reduced_data)
 kmeans.find_clusters(8)
 kmeans.plot_kmeans()
+
+dataset.filter_out_zeros()
+dataset.keep_15_symptoms()
+dataset.merge_regions()
+symp_pop = symptomsPopularity.SymptomPopularity(dataset.d)
+symp_pop.symptoms_popularity()
