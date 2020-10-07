@@ -1,78 +1,82 @@
+import copy
 import pandas as pd
-import numpy as np
 
 
-def filter_out_zeros(df: pd.DataFrame):
-    return df.dropna(axis=1, how="all")
+class Data:
 
+    def __init__(self):
+        self.data = self.get_data()
+        self.filter_out_zeros()
 
-def keep_15_symptoms(df: pd.DataFrame):
-    # sum all columns(symptoms)
-    cropped = df.loc[:, "symptom:Adrenal crisis":"symptom:Yawn"]
-    s = cropped.sum(axis=0)
+    def get_data(self):
+        hosp = pd.read_csv("hospitalization.csv")
+        hosp = hosp[["open_covid_region_code", "date", "hospitalized_new"]]
 
-    # get 15 symptoms with highest sum value(sum of popularity)
-    arr = [0] * 15
-    for j in range(15):
-        # most common symptoms with sum of columns:
-        # arr[j] = (s.idxmax(), ',', s.max())
-        arr[j] = s.idxmax()
-        s = s.drop(s.idxmax(), axis=0)
+        hosp["date"] = pd.to_datetime(hosp["date"], format="%Y-%m-%d") - pd.to_timedelta(
+            7, unit="d"
+        )
+        hosp = (
+            hosp.groupby(
+                [
+                    "open_covid_region_code",
+                    pd.Grouper(key="date", freq="W-MON", closed="left"),
+                ]
+            )
+                .sum()
+                .reset_index()
+        )
 
-    # keep only 15 symptoms with highest popularity and convert to csv
-    return df.drop(
-        columns=[
-            col
-            for col in df.loc[:, "symptom:Adrenal crisis":"symptom:Yawn"]
-            if col not in arr
-        ]
-    )
+        search = pd.read_csv("2020_US_weekly_symptoms_dataset.csv")
+        search["date"] = pd.to_datetime(search["date"], format="%Y-%m-%d")
 
+        results = pd.merge(search, hosp, how="left", on=["open_covid_region_code", "date"])
+        return results.fillna(0)
 
-def merge_regions(data: pd.DataFrame):
-    return data.groupby(["date"]).sum().reset_index()
+    def filter_regions_count(self, threshold=0.1):
+        """
+        Keep all open_covid_region_code regions that have > 0.1 * #_elements that are not
+        NaN values.
+        :param d: region data
+        :param threshold: cutoff point. Any region with less than 0.1 of all cells filled
+                with data are filtered out
+        """
+        data_per_region = (
+            self.data.groupby(["open_covid_region_code"])
+                .count()
+                .loc[:, "symptom:Adrenal crisis":"symptom:Yawn"]
+                .sum(axis=1)
+        )
+        size_per_region = self.data.groupby(["open_covid_region_code"]).size()[0] * self.data.shape[1]
+        good_regions = list(
+            data_per_region[data_per_region > threshold * size_per_region].index
+        )
+        return self.data[self.data["open_covid_region_code"].isin(good_regions)].reset_index(drop=True)
 
+    def filter_out_zeros(self):
+        return self.data.dropna(axis=1, how="all")
 
-def filter_regions_count(d: pd.DataFrame, threshold=0.1):
-    """
-    Keep all open_covid_region_code regions that have > 0.1 * #_elements that are not
-    NaN values.
-    :param d: region data
-    :param threshold: cutoff point. Any region with less than 0.1 of all cells filled
-            with data are filtered out
-    """
-    data_per_region = (
-        d.groupby(["open_covid_region_code"])
-        .count()
-        .loc[:, "symptom:Adrenal crisis":"symptom:Yawn"]
-        .sum(axis=1)
-    )
-    size_per_region = d.groupby(["open_covid_region_code"]).size()[0] * d.shape[1]
-    good_regions = list(
-        data_per_region[data_per_region > threshold * size_per_region].index
-    )
-    return d[d["open_covid_region_code"].isin(good_regions)].reset_index(drop=True)
+    def keep_15_symptoms(self):
+        # sum all columns(symptoms)
+        trim_data = copy.deepcopy(self.data)
+        cropped = trim_data.loc[:, "symptom:Adrenal crisis":"symptom:Yawn"]
+        s = cropped.sum(axis=0)
 
+        # get 15 symptoms with highest sum value(sum of popularity)
+        arr = [0] * 15
+        for j in range(15):
+            # most common symptoms with sum of columns:
+            # arr[j] = (s.idxmax(), ',', s.max())
+            arr[j] = s.idxmax()
+            s = s.drop(s.idxmax(), axis=0)
 
-def get_data():
-    hosp = pd.read_csv("hospitalization.csv")
-    hosp = hosp[["open_covid_region_code", "date", "hospitalized_new"]]
-
-    hosp["date"] = pd.to_datetime(hosp["date"], format="%Y-%m-%d") - pd.to_timedelta(
-        7, unit="d"
-    )
-    hosp = (
-        hosp.groupby(
-            [
-                "open_covid_region_code",
-                pd.Grouper(key="date", freq="W-MON", closed="left"),
+        # keep only 15 symptoms with highest popularity and convert to csv
+        return trim_data.drop(
+            columns=[
+                col
+                for col in trim_data.loc[:, "symptom:Adrenal crisis":"symptom:Yawn"]
+                if col not in arr
             ]
         )
-        .sum()
-        .reset_index()
-    )
 
-    search = pd.read_csv("2020_US_weekly_symptoms_dataset.csv")
-    search["date"] = pd.to_datetime(search["date"], format="%Y-%m-%d")
-
-    return pd.merge(search, hosp, how="left", on=["open_covid_region_code", "date"])
+    def merge_regions(self):
+        return self.data.groupby(["date"]).sum().reset_index()
