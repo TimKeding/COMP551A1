@@ -46,7 +46,7 @@ class Data:
         data_per_region = (
             self.d.groupby(["open_covid_region_code"])
             .count()
-            .loc[:, "symptom:Adrenal crisis":"symptom:Yawn"]
+            .iloc[:, 6:-1]
             .sum(axis=1)
         )
         size_per_region = (
