@@ -3,6 +3,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 from matplotlib import cm
+import numpy as np
 
 
 class PCAPlotting:
@@ -32,6 +33,11 @@ class PCAPlotting:
                 self.plot_3d_surface_pca()
             else:
                 self.plot_3d_points_pca()
+        return
+
+    def add_hospitalized_new(self):
+        hospitalized_new = self.data.loc[:, "hospitalized_new"].values[np.newaxis].T
+        self.reduced_data = np.append(self.reduced_data, hospitalized_new, axis=1)
         return
 
     def plot_2d_pca(self):
