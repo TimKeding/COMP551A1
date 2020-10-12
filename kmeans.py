@@ -25,7 +25,7 @@ class Kmeans:
             if np.all(self.centers == new_centers):
                 break
             self.centers = new_centers
-        return
+        return self.labels
 
     def plot_kmeans(self):
         if self.dimensions == 2:
@@ -49,3 +49,31 @@ class Kmeans:
 
         plt.show()
         return
+
+    def intersect(self, a, b):
+        """ return the intersection of two lists """
+        return list(set(a) & set(b))
+
+    def consistency(self, labels_high_dim, labels_low_dim):
+        list1 = [[], [], [], [], [], [], [], []]
+        for i in range(len(labels_high_dim)):
+            list1[labels_high_dim[i]].append(i)
+
+        list2 = [[], [], [], [], [], [], [], []]
+        for i in range(len(labels_low_dim)):
+            list2[labels_low_dim[i]].append(i)
+
+        intersec = []
+        for j in range(len(list1)):
+            for k in range(len(list2)):
+                intersec.append((len(self.intersect(list1[j], list2[k])), (j, k)))
+        percentage_intersec = []
+        for i in range(8):
+            maximum = max(intersec)
+            coord = maximum[1]
+            mean_lists_length = (len(list1[coord[0]]) + len(list2[coord[1]])) / 2
+            percentage_intersec.append((maximum[0] / mean_lists_length) * 100)
+            intersec.remove(max(intersec))
+        return (percentage_intersec, sum(percentage_intersec) / len(percentage_intersec))
+
+
