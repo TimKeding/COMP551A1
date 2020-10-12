@@ -8,6 +8,7 @@ class SymptomPopularity:
 
     def symptoms_popularity(self):
         self.d['hospitalized_new'] = self.d['hospitalized_new'] / 5
+        self.d['date'] = self.d['date'].dt.date
         df = self.d.loc[:, 'date':'symptom:Viral pneumonia']
         fig0, axs0 = plt.subplots(nrows=2, ncols=2)
         fig1, axs1 = plt.subplots(nrows=2, ncols=2)
