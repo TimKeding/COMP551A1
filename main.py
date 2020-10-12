@@ -14,7 +14,8 @@ kmeans0 = Kmeans(symptom_data)
 labels_high_dim = kmeans0.find_clusters(8)
 
 pca_data = PCAPlotting(dataset.d)
-pca_data.reduce_dimensionality(3)
+pca_data.reduce_dimensionality(2)
+#pca_data.add_hospitalized_new()
 kmeans = Kmeans(pca_data.reduced_data)
 labels_low_dim = kmeans.find_clusters(8)
 

@@ -44,10 +44,7 @@ class Data:
                 with data are filtered out
         """
         data_per_region = (
-            self.d.groupby(["open_covid_region_code"])
-            .count()
-            .loc[:, "symptom:Adrenal crisis":"symptom:Yawn"]
-            .sum(axis=1)
+            self.d.groupby(["open_covid_region_code"]).count().iloc[:, 6:-1].sum(axis=1)
         )
         size_per_region = (
             self.d.groupby(["open_covid_region_code"]).size()[0] * self.d.shape[1]
@@ -58,6 +55,11 @@ class Data:
         self.d = self.d[
             self.d["open_covid_region_code"].isin(good_regions)
         ].reset_index(drop=True)
+
+    def filter_no_covid_cases(self):
+        self.d = self.d.groupby(["open_covid_region_code"]).filter(
+            lambda g: g["hospitalized_new"].sum() > 0
+        )
 
     def filter_out_zeros(self):
         self.d = self.d.dropna(axis=1, how="all")
