@@ -30,7 +30,6 @@ kmeans.plot_kmeans()
 dataset.filter_out_zeros()
 dataset.keep_15_symptoms()
 dataset.merge_regions()
-print(dataset.d['date'])
 symp_pop = symptomsPopularity.SymptomPopularity(dataset.d)
 symp_pop.symptoms_popularity()
 
