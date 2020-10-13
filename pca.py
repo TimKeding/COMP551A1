@@ -12,6 +12,7 @@ class PCAPlotting:
         self.plot_dimensions = 2
         self.data = data
         self.reduced_data = None
+        self.pca = None
 
     def reduce_dimensionality(self, new_dimension=2):
         self.plot_dimensions = new_dimension
@@ -20,8 +21,8 @@ class PCAPlotting:
         symptom_data = self.data.loc[:, symptoms].values
         symptom_data = StandardScaler().fit_transform(symptom_data)
 
-        pca = PCA(n_components=new_dimension)
-        self.reduced_data = pca.fit_transform(symptom_data)
+        self.pca = PCA(n_components=new_dimension)
+        self.reduced_data = self.pca.fit_transform(symptom_data)
         return
 
     def plot_data(self, surface=False):
@@ -37,6 +38,13 @@ class PCAPlotting:
     def add_hospitalized_new(self):
         hospitalized_new = self.data.loc[:, "hospitalized_new"].values[np.newaxis].T
         self.reduced_data = np.append(self.reduced_data, hospitalized_new, axis=1)
+        return
+
+    def plot_optimal_pc(self, dimensions=10):
+        self.reduce_dimensionality(dimensions)
+        print(self.pca.explained_variance_ratio_)
+        plt.plot(range(1, dimensions + 1), self.pca.explained_variance_ratio_, linestyle='-', marker='o')
+        plt.show()
         return
 
     def plot_2d_pca(self):

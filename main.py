@@ -19,6 +19,7 @@ pca_data.reduce_dimensionality(3)
 kmeans = Kmeans(pca_data.reduced_data)
 labels_low_dim = kmeans.find_clusters(8)
 
+# pca_data.plot_optimal_pc()
 consistency = kmeans.consistency(labels_high_dim, labels_low_dim)
 print("{ Consistency percentages = ", consistency[0], '\n',
       "Percentage of points falling in the same cluster together again = ",
