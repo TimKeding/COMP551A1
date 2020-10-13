@@ -1,7 +1,6 @@
 import copy
 import pandas as pd
 
-
 class Data:
     def __init__(self):
         self.d = None
@@ -62,17 +61,17 @@ class Data:
         )
 
     def filter_out_zeros(self):
-        self.d = self.d.dropna(axis=1, how="all")
+        self.d = self.d.dropna(axis=1, how='all')
 
-    def keep_15_symptoms(self):
+    def keep_x_symptoms(self, x):
         # sum all columns(symptoms)
         trim_data = copy.deepcopy(self.d)
         cropped = trim_data.loc[:, "symptom:Adrenal crisis":"symptom:Yawn"]
         s = cropped.sum(axis=0)
 
         # get 15 symptoms with highest sum value(sum of popularity)
-        arr = [0] * 15
-        for j in range(15):
+        arr = [0] * x
+        for j in range(x):
             # most common symptoms with sum of columns:
             arr[j] = s.idxmax()
             s = s.drop(s.idxmax(), axis=0)
@@ -88,3 +87,6 @@ class Data:
 
     def merge_regions(self):
         self.d = self.d.groupby(["date"]).sum().reset_index()
+
+
+

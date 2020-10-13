@@ -23,7 +23,7 @@ class PCAPlotting:
 
         self.pca = PCA(n_components=new_dimension)
         self.reduced_data = self.pca.fit_transform(symptom_data)
-        return
+        return self.reduced_data
 
     def plot_data(self, surface=False):
         if self.plot_dimensions == 2:
