@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.metrics import pairwise_distances_argmin
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 
 class Kmeans:
@@ -42,10 +43,11 @@ class Kmeans:
         plt.show()
         return
 
-    def plot_3d_kmeans(self):
+    def plot_3d_kmeans(self, view_init=None):
         ax = plt.axes(projection='3d')
         ax.scatter3D(self.data[:, 0], self.data[:, 1], self.data[:, 2], c=self.labels,
                      linewidth=0, antialiased=False)
-
+        if view_init:
+            ax.view_init(view_init[0], view_init[1])
         plt.show()
         return
