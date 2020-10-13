@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
-from sklearn.metrics import pairwise_distances_argmin
+from sklearn.metrics import pairwise_distances_argmin, silhouette_score
+from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 
 
