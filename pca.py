@@ -42,7 +42,6 @@ class PCAPlotting:
 
     def plot_optimal_pc(self, dimensions=10):
         self.reduce_dimensionality(dimensions)
-        print(self.pca.explained_variance_ratio_)
         plt.plot(range(1, dimensions + 1), self.pca.explained_variance_ratio_, linestyle='-', marker='o')
         plt.show()
         return
