@@ -1,6 +1,7 @@
 import copy
 import pandas as pd
 
+
 class Data:
     def __init__(self):
         self.d = None
@@ -61,7 +62,7 @@ class Data:
         )
 
     def filter_out_zeros(self):
-        self.d = self.d.dropna(axis=1, how='all')
+        self.d = self.d.dropna(axis=1, how="all")
 
     def keep_x_symptoms(self, x):
         # sum all columns(symptoms)
@@ -88,5 +89,11 @@ class Data:
     def merge_regions(self):
         self.d = self.d.groupby(["date"]).sum().reset_index()
 
-
-
+    def normalize_regions(self):
+        median = self.d.groupby(["open_covid_region_code"]).mean().mean(axis=1)
+        self.d = self.d.apply(
+            lambda row: row.iloc[:6]  # preserve first 6 columns
+            .append(row.iloc[6:-1] / median[row["open_covid_region_code"]])  # normalize features per region
+            .append(row.iloc[-1:]),  # add labels
+            axis=1,
+        )
